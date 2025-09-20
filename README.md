@@ -1,10 +1,3 @@
-# cloudFit
-A smart system that recommends suitable clothes based on real-time weather conditions like temperature, humidity, and rain, helping users stay comfortable and stylish.
-
-
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
 
 ## Run Locally
 
@@ -17,18 +10,6 @@ A smart system that recommends suitable clothes based on real-time weather condi
 3. Run the app:
    `npm run dev`
 
-<!-- Banner -->
-<p align="center">
-  <img src="https://img.shields.io/badge/👕-Smart%20Clothes%20Recommender-blueviolet?style=for-the-badge" alt="Project Banner" />
-</p>
-
-<h1 align="center">🌦️ Smart Clothes Recommendation System 👔</h1>
-
-<p align="center">
-   <b>“Your AI-powered stylist that adapts to <i>weather, body type, locality, and occasions</i> – with a 3D outfit preview.”</b>
-</p>
-
----
 
 ## ✨ Features
 ✅ Weather-based outfit suggestions (temperature, rain, humidity)  
