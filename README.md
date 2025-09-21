@@ -42,7 +42,7 @@
 
 ## 📸 Demo
 <p align="center">
-  <img width="994" height="818" alt="Screenshot 2025-09-21 101731" src="https://github.com/user-attachments/assets/e44e0402-7bf1-42f5-9c54-1ecaa95f2a9a" />
+  <img width="694" height="518" alt="Screenshot 2025-09-21 101731" src="https://github.com/user-attachments/assets/e44e0402-7bf1-42f5-9c54-1ecaa95f2a9a" />
 
 </p>
 
