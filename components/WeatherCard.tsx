@@ -97,7 +97,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ weather, isLoading, error, on
               value={locationInput}
               onChange={(e) => setLocationInput(e.target.value)}
               className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md bg-slate-700 border-slate-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-white"
-              placeholder="e.g., London or 90210"
+              placeholder="e.g., India  or 121102"
               aria-label="Location for weather forecast"
             />
             <button

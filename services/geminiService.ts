@@ -75,54 +75,87 @@ export async function generateOutfitRecommendations(profile: UserProfile, contex
   }
 }
 
+// export async function generateWeatherReport(location: string): Promise<WeatherReport> {
+//   const prompt = `
+//   Based on the following location, generate a concise weather report for the current day.
+//   Location: ${location}
+//   Your response must be a valid JSON object that adheres to the provided schema. 
+//   Do not include any text, markdown, or backticks outside of the JSON object.
+
+//   Provide:
+//   - Location as "City, Country"
+//   - Wind speed in km/h
+//   - Temperature in Celsius
+//   - Chance of Rain as a percentage (0–100)
+// `;
+
+
+//   const responseSchema = {
+//     type: Type.OBJECT,
+//     properties: {
+//       location: { type: Type.STRING },
+//       temperature: { type: Type.NUMBER },
+//       condition: { type: Type.STRING, description: "e.g., 'Partly Cloudy', 'Sunny', 'Light Rain'" },
+//       feelsLike: { type: Type.NUMBER },
+//       humidity: { type: Type.NUMBER, description: "As a percentage, e.g., 65" },
+//       windSpeed: { type: Type.NUMBER, description: "In km/h" },
+//       rain: { type: Type.NUMBER, description: "Chance of rain in %, e.g., 40" }, // 👈 added
+//       summary: { type: Type.STRING, description: "A brief, one-sentence summary of the day's weather." },
+//     },
+//     required: ["location", "temperature", "condition", "feelsLike", "humidity", "windSpeed", "summary", "rain"] // 👈 include rain
+//   };
+
+
+//   try {
+//     const response = await ai.models.generateContent({
+//       model: 'gemini-2.5-flash',
+//       contents: prompt,
+//       config: {
+//         responseMimeType: 'application/json',
+//         responseSchema: responseSchema,
+//       }
+//     });
+
+//     const jsonString = response.text.trim();
+//     return JSON.parse(jsonString) as WeatherReport;
+//   } catch (error) {
+//     console.error("Error generating weather report:", error);
+//     throw new Error("Failed to get weather data from the AI.");
+//   }
+// }
+
+// ✅ Updated Weather Function to use OpenWeatherMap API
 export async function generateWeatherReport(location: string): Promise<WeatherReport> {
-  const prompt = `
-  Based on the following location, generate a concise weather report for the current day.
-  Location: ${location}
-  Your response must be a valid JSON object that adheres to the provided schema. 
-  Do not include any text, markdown, or backticks outside of the JSON object.
-
-  Provide:
-  - Location as "City, Country"
-  - Wind speed in km/h
-  - Temperature in Celsius
-  - Chance of Rain as a percentage (0–100)
-`;
-
-
-  const responseSchema = {
-    type: Type.OBJECT,
-    properties: {
-      location: { type: Type.STRING },
-      temperature: { type: Type.NUMBER },
-      condition: { type: Type.STRING, description: "e.g., 'Partly Cloudy', 'Sunny', 'Light Rain'" },
-      feelsLike: { type: Type.NUMBER },
-      humidity: { type: Type.NUMBER, description: "As a percentage, e.g., 65" },
-      windSpeed: { type: Type.NUMBER, description: "In km/h" },
-      rain: { type: Type.NUMBER, description: "Chance of rain in %, e.g., 40" }, // 👈 added
-      summary: { type: Type.STRING, description: "A brief, one-sentence summary of the day's weather." },
-    },
-    required: ["location", "temperature", "condition", "feelsLike", "humidity", "windSpeed", "summary", "rain"] // 👈 include rain
-  };
-
+  const apiKey = process.env.WEATHER_API_KEY;
+  const url = `https://api.openweathermap.org/data/2.5/forecast?q=${location}&units=metric&appid=${apiKey}`;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: responseSchema,
-      }
-    });
+    const response = await fetch(url);
+    const data = await response.json();
 
-    const jsonString = response.text.trim();
-    return JSON.parse(jsonString) as WeatherReport;
+    if (data.cod !== "200") {
+      throw new Error(data.message || "Failed to fetch weather data");
+    }
+
+    const current = data.list[0]; // nearest forecast (3-hour block)
+    const weather = current.weather[0];
+
+    return {
+      location: `${data.city.name}, ${data.city.country}`,
+      temperature: current.main.temp,
+      feelsLike: current.main.feels_like,
+      humidity: current.main.humidity,
+      condition: weather.description,
+      windSpeed: current.wind.speed,
+      rain: current.pop ? Math.round(current.pop * 100) : 0, // ✅ chance of rain in %
+      summary: `It is ${weather.description} with a temperature of ${current.main.temp}°C. Rain chance is ${current.pop ? Math.round(current.pop * 100) : 0}%.`,
+    };
   } catch (error) {
-    console.error("Error generating weather report:", error);
-    throw new Error("Failed to get weather data from the AI.");
+    console.error("Error fetching weather report:", error);
+    throw new Error("Failed to get real weather data.");
   }
 }
+
 
 export async function describePersonInImage(base64ImageDataUrl: string): Promise<string> {
   const mimeType = base64ImageDataUrl.substring(base64ImageDataUrl.indexOf(":") + 1, base64ImageDataUrl.indexOf(";"));
