@@ -14,6 +14,7 @@ export interface WeatherReport {
   humidity: number;
   windSpeed: number;
   summary: string;
+  rain: number; // Chance of rain as a percentage
 }
 
 export interface UserProfile {

@@ -77,11 +77,18 @@ export async function generateOutfitRecommendations(profile: UserProfile, contex
 
 export async function generateWeatherReport(location: string): Promise<WeatherReport> {
   const prompt = `
-    Based on the following location, generate a concise weather report for the current day.
-    Location: ${location}
-    Your response must be a valid JSON object that adheres to the provided schema. Do not include any text, markdown, or backticks outside of the JSON object.
-    Provide the location as "City, Country". Wind speed should be in km/h. Temperature in Celsius.
-  `;
+  Based on the following location, generate a concise weather report for the current day.
+  Location: ${location}
+  Your response must be a valid JSON object that adheres to the provided schema. 
+  Do not include any text, markdown, or backticks outside of the JSON object.
+
+  Provide:
+  - Location as "City, Country"
+  - Wind speed in km/h
+  - Temperature in Celsius
+  - Chance of Rain as a percentage (0–100)
+`;
+
 
   const responseSchema = {
     type: Type.OBJECT,
@@ -92,10 +99,12 @@ export async function generateWeatherReport(location: string): Promise<WeatherRe
       feelsLike: { type: Type.NUMBER },
       humidity: { type: Type.NUMBER, description: "As a percentage, e.g., 65" },
       windSpeed: { type: Type.NUMBER, description: "In km/h" },
+      rain: { type: Type.NUMBER, description: "Chance of rain in %, e.g., 40" }, // 👈 added
       summary: { type: Type.STRING, description: "A brief, one-sentence summary of the day's weather." },
     },
-    required: ["location", "temperature", "condition", "feelsLike", "humidity", "windSpeed", "summary"]
+    required: ["location", "temperature", "condition", "feelsLike", "humidity", "windSpeed", "summary", "rain"] // 👈 include rain
   };
+
 
   try {
     const response = await ai.models.generateContent({
@@ -116,35 +125,35 @@ export async function generateWeatherReport(location: string): Promise<WeatherRe
 }
 
 export async function describePersonInImage(base64ImageDataUrl: string): Promise<string> {
-    const mimeType = base64ImageDataUrl.substring(base64ImageDataUrl.indexOf(":") + 1, base64ImageDataUrl.indexOf(";"));
-    const data = base64ImageDataUrl.substring(base64ImageDataUrl.indexOf(",") + 1);
-    
-    const imagePart = {
-        inlineData: {
-            mimeType: mimeType,
-            data: data,
-        },
-    };
-    const textPart = {
-        text: "Briefly describe the person in this image. Focus on features relevant for generating a consistent fashion photo, like gender presentation, apparent age, ethnicity, hair style and color. Be concise, objective, and descriptive. Example: 'A young woman in her 20s with long, blonde wavy hair and fair skin.'"
-    };
+  const mimeType = base64ImageDataUrl.substring(base64ImageDataUrl.indexOf(":") + 1, base64ImageDataUrl.indexOf(";"));
+  const data = base64ImageDataUrl.substring(base64ImageDataUrl.indexOf(",") + 1);
 
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: { parts: [imagePart, textPart] },
-        });
-        return response.text.trim();
-    } catch (error) {
-        console.error("Error describing person in image:", error);
-        throw new Error("Failed to analyze the avatar image.");
-    }
+  const imagePart = {
+    inlineData: {
+      mimeType: mimeType,
+      data: data,
+    },
+  };
+  const textPart = {
+    text: "Briefly describe the person in this image. Focus on features relevant for generating a consistent fashion photo, like gender presentation, apparent age, ethnicity, hair style and color. Be concise, objective, and descriptive. Example: 'A young woman in her 20s with long, blonde wavy hair and fair skin.'"
+  };
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: { parts: [imagePart, textPart] },
+    });
+    return response.text.trim();
+  } catch (error) {
+    console.error("Error describing person in image:", error);
+    throw new Error("Failed to analyze the avatar image.");
+  }
 }
 
 export async function visualizeOutfit(outfit: OutfitRecommendation, profile: UserProfile): Promise<string> {
   const detailedItems = outfit.items.map(item => `${item.name} (${item.description})`).join(', ');
 
-  const personDescription = profile.avatarDescription 
+  const personDescription = profile.avatarDescription
     ? `a person who looks like this: ${profile.avatarDescription}`
     : `a person with a '${profile.bodyType}' body type`;
 
@@ -159,13 +168,13 @@ export async function visualizeOutfit(outfit: OutfitRecommendation, profile: Use
 
   try {
     const response = await ai.models.generateImages({
-        model: 'imagen-4.0-generate-001',
-        prompt: prompt,
-        config: {
-          numberOfImages: 1,
-          outputMimeType: 'image/jpeg',
-          aspectRatio: '3:4',
-        },
+      model: 'imagen-4.0-generate-001',
+      prompt: prompt,
+      config: {
+        numberOfImages: 1,
+        outputMimeType: 'image/jpeg',
+        aspectRatio: '3:4',
+      },
     });
 
     if (response.generatedImages && response.generatedImages.length > 0) {

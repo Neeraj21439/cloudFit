@@ -60,7 +60,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ weather, isLoading, error, on
             <div className="mt-4 flex-grow">
                  <p className="text-sm text-slate-300 bg-slate-700/50 p-3 rounded-md">{weather.summary}</p>
             </div>
-            <div className="mt-4 pt-4 border-t border-slate-700 grid grid-cols-3 gap-4 text-center">
+            <div className="mt-4 pt-4 border-t border-slate-700 grid grid-cols-2 gap-4 text-center">
                 <div>
                     <p className="text-xs text-slate-400">Feels Like</p>
                     <p className="font-semibold text-white">{Math.round(weather.feelsLike)}°C</p>
@@ -72,6 +72,10 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ weather, isLoading, error, on
                  <div>
                     <p className="text-xs text-slate-400">Wind</p>
                     <p className="font-semibold text-white">{weather.windSpeed} km/h</p>
+                </div>
+                <div>
+                    <p className="text-xs text-slate-400">Chance of Rain</p>
+                    <p className="font-semibold text-white">{weather.rain} %</p>
                 </div>
             </div>
         </div>
